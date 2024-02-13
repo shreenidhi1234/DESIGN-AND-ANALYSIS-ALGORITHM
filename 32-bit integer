@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Function to calculate the result of an expression
+int calculate(char *s) {
+    int num = 0;
+    int result = 0;
+    int sign = 1;
+    int len = strlen(s);
+
+    for (int i = 0; i < len; i++) {
+        char c = s[i];
+        if (isdigit(c)) {
+            num = num * 10 + (c - '0');
+        } else if (c == '+' || c == '-') {
+            result += sign * num;
+            num = 0;
+            sign = (c == '+') ? 1 : -1;
+        }
+    }
+
+    result += sign * num;
+    return result;
+}
+
+// Function to recursively generate all possible results
+void generateResults(char *expression, int *results, int *size, int start, int end) {
+    if (start == end) {
+        results[*size] = calculate(expression);
+        (*size)++;
+        return;
+    }
+
+    for (int i = start; i < end; i++) {
+        if (expression[i] == '+' || expression[i] == '-') {
+            char temp = expression[i];
+            expression[i] = '\0';
+
+            generateResults(expression, results, size, start, i);
+            generateResults(expression, results, size, i + 1, end);
+
+            expression[i] = temp;
+        }
+    }
+}
+
+// Function to return all possible results from computing different possible ways to group numbers and operators
+int* diffWaysToCompute(char *expression, int *returnSize) {
+    int len = strlen(expression);
+    int *results = (int*)malloc(sizeof(int) * 10000);
+    *returnSize = 0;
+
+    generateResults(expression, results, returnSize, 0, len);
+
+    return results;
+}
+
+int main() {
+    char expression[] = "2-1-1";
+    int returnSize;
+    int *results = diffWaysToCompute(expression, &returnSize);
+
+    printf("Output: ");
+    for (int i = 0; i < returnSize; i++) {
+        printf("%d ", results[i]);
+    }
+    printf("\n");
+
+    free(results);
+
+    return 0;
+}
